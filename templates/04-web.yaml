@@ -466,9 +466,9 @@ Resources:
             yum:
               awslogs: []
               httpd24: []
-              postgresql93: []
+              mysql-client: []
               php70: []
-              php70-pgsql: []
+              php70-mysql: []
               php70-gd: []
               php70-soap: []
               php70-intl: []
@@ -577,7 +577,7 @@ Resources:
               content: !Sub |
                 <?php
                 $CFG = new stdClass;
-                $CFG->dbtype = 'pgsql';
+                $CFG->dbtype = 'mysqli';
                 $CFG->dblibrary = 'native';
                 $CFG->dbhost = '${DatabaseClusterEndpointAddress}';
                 $CFG->dbname = '${DatabaseName}';
@@ -601,7 +601,12 @@ Resources:
                   $hostwithprotocol = ‘https://’ . strtolower($hostname);
                 }
                 $CFG->wwwroot = strtolower($hostwithprotocol);
-                $CFG->sslproxy = (substr($hostwithprotocol,0,5)==’https’ ? true : false);
+                if (substr($hostwithprotocol,0,5)=='https') {
+                  $CFG->sslproxy = true;
+                }
+                else {
+                  $CFG->sslproxy = false;
+                }
                 // Moodledata location //
                 $CFG->dataroot = '/var/www/moodle/data';
                 $CFG->tempdir = '/var/www/moodle/temp';
@@ -627,7 +632,7 @@ Resources:
             /tmp/install_moodle.sh:
               content:  !Sub |
                 #!/bin/bash -xe
-                wget -O /tmp/moodle.tgz https://download.moodle.org/stable34/moodle-3.4.tgz  
+                wget -O /tmp/moodle.tgz https://download.moodle.org/stable35/moodle-3.5.3.tgz  
                 tar -xvzf /tmp/moodle.tgz --strip-components=1 -C /var/www/moodle/html/
                 mv /tmp/config.php /var/www/moodle/html/config.php
                 chown -R root:apache /var/www/moodle/html
